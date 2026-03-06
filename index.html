@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,199 +5,562 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>💩 SITE SHIT TRACKER 3000</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
 <style>
-:root {
-  --yellow: #FFD600;
-  --brown: #5C3A1E;
-  --dark-brown: #1a0e05;
-  --orange: #FF6B00;
-  --tan: #d4aa7d;
-  --green: #39FF14;
-  --red: #FF3131;
-  --bg: #140c04;
-  --card-bg: #1f1208;
-  --border: #5C3A1E;
+:root{--y:#FFD600;--br:#5C3A1E;--or:#FF6B00;--tn:#d4aa7d;--gn:#39FF14;--rd:#FF3131;--bg:#140c04;--cb:#1f1208;--bd:#5C3A1E}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Share Tech Mono',monospace;background:var(--bg);color:var(--tn);min-height:100vh;padding-bottom:60px}
+header{background:linear-gradient(180deg,#2a1500,#0d0600);border-bottom:4px solid var(--y);padding:16px 20px 12px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 4px 30px rgba(255,107,0,.25)}
+h1{font-family:'Black Ops One',cursive;font-size:clamp(1.4rem,4vw,2.6rem);color:var(--y);text-shadow:3px 3px 0 #5C3A1E;letter-spacing:2px}
+.tag{font-size:.65rem;color:var(--or);letter-spacing:4px;margin-top:3px}
+.sync-status{font-size:.6rem;letter-spacing:2px;margin-top:4px}
+.sync-status.ok{color:var(--gn)}
+.sync-status.err{color:var(--rd)}
+.sync-status.load{color:#8a6a4a}
+.ticker-wrap{background:var(--y);overflow:hidden;padding:5px 0;border-bottom:3px solid var(--br)}
+.ticker-track{display:inline-block;white-space:nowrap;animation:tick 32s linear infinite;font-family:'Black Ops One',cursive;font-size:.78rem;color:#1a0e05}
+@keyframes tick{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+.container{max-width:980px;margin:0 auto;padding:16px 12px}
+.tally{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px}
+@media(max-width:480px){.tally{grid-template-columns:repeat(2,1fr)}}
+.tbox{background:#0d0700;border:2px solid var(--bd);border-radius:4px;padding:11px;text-align:center}
+.tnum{font-family:'Black Ops One',cursive;font-size:1.7rem;color:var(--y);line-height:1}
+.tlbl{font-size:.58rem;color:#8a6a4a;text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+.shame{background:linear-gradient(135deg,#2a0000,#160000);border:3px solid var(--rd);border-radius:4px;padding:12px 15px;margin-bottom:14px;display:none;align-items:center;gap:12px;box-shadow:0 0 18px rgba(255,49,49,.2)}
+.shame-icon{font-size:2rem;flex-shrink:0}
+.shame-title{font-family:'Black Ops One',cursive;color:var(--rd);font-size:.75rem;letter-spacing:2px}
+.shame-name{font-family:'Black Ops One',cursive;color:var(--y);font-size:1.25rem}
+.shame-sub{font-size:.62rem;color:#9a4a4a;margin-top:2px}
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:3px solid var(--bd);flex-wrap:wrap}
+.tbtn{font-family:'Black Ops One',cursive;font-size:.73rem;letter-spacing:1px;padding:9px 15px;background:transparent;color:var(--tn);border:2px solid var(--bd);border-bottom:none;cursor:pointer;transition:all .15s}
+.tbtn:hover{background:rgba(255,214,0,.08);color:var(--y)}
+.tbtn.on{background:var(--y);color:#1a0e05;border-color:var(--y)}
+.panel{display:none}.panel.on{display:block}
+.card{background:var(--cb);border:2px solid var(--bd);border-radius:4px;padding:15px;margin-bottom:12px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--y),var(--or))}
+.ctitle{font-family:'Black Ops One',cursive;color:var(--y);font-size:.9rem;letter-spacing:2px;margin-bottom:13px}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:11px}
+.wcard{background:#160d03;border:2px solid var(--bd);border-radius:4px;padding:13px;transition:border-color .2s,box-shadow .2s}
+.wcard.live{border-color:var(--gn);animation:glow 2s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(57,255,20,.2)}50%{box-shadow:0 0 22px rgba(57,255,20,.45)}}
+.whead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.wname{font-family:'Black Ops One',cursive;font-size:.88rem;color:var(--y)}
+.wnick{font-size:.82rem;color:var(--tn);font-family:'Share Tech Mono',monospace;font-weight:normal}
+.wrank{font-size:.58rem;color:var(--or);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.wpill{font-size:.58rem;font-family:'Black Ops One',cursive;letter-spacing:1px;padding:3px 8px;border-radius:20px;flex-shrink:0;margin-top:2px}
+.wpill.on{background:rgba(57,255,20,.13);color:var(--gn);border:1px solid rgba(57,255,20,.35)}
+.wpill.off{background:rgba(255,49,49,.09);color:var(--rd);border:1px solid rgba(255,49,49,.28)}
+.srow{display:flex;gap:7px;margin:9px 0}
+.sbox{background:rgba(0,0,0,.4);border:1px solid var(--bd);border-radius:3px;padding:5px 7px;flex:1;text-align:center;min-width:55px}
+.slbl{font-size:.56rem;color:#6a4a2a;text-transform:uppercase;letter-spacing:1px}
+.sval{font-size:.9rem;color:var(--tn);margin-top:2px}
+.sval.hi{color:var(--y)}
+.ltimer{font-size:.75rem;color:var(--gn);background:rgba(57,255,20,.07);border:1px solid rgba(57,255,20,.22);border-radius:3px;padding:4px 8px;text-align:center;letter-spacing:2px;display:none;margin-bottom:8px}
+.ltimer.on{display:block}
+.brow{display:flex;gap:6px;flex-wrap:wrap}
+.btn{font-family:'Black Ops One',cursive;font-size:.66rem;letter-spacing:1px;padding:8px 9px;border:none;cursor:pointer;border-radius:3px;transition:all .15s;flex:1;text-align:center}
+.btn:hover:not(:disabled){filter:brightness(1.2);transform:scale(1.03)}
+.btn:disabled{opacity:.3;cursor:not-allowed;transform:none!important}
+.bin{background:var(--gn);color:#000}
+.bout{background:var(--rd);color:#fff}
+.bpic{background:var(--or);color:#fff}
+.wlast{font-size:.6rem;color:#5a3a1a;margin-top:7px;border-top:1px solid #1e1008;padding-top:5px}
+.lboard{display:flex;flex-direction:column;gap:8px}
+.lbrow{display:flex;align-items:center;gap:11px;background:#0d0700;border:1px solid var(--bd);border-radius:4px;padding:11px 13px;transition:border-color .15s}
+.lbrow:hover{border-color:var(--y)}
+.lbrank{font-family:'Black Ops One',cursive;font-size:1.25rem;width:32px;text-align:center;flex-shrink:0}
+.lbrank.g{color:gold}.lbrank.s{color:silver}.lbrank.b{color:#cd7f32}.lbrank.o{color:#4a3a2a}
+.lbname{font-family:'Black Ops One',cursive;font-size:.88rem;color:var(--y)}
+.lbtitle{font-size:.58rem;color:var(--or);letter-spacing:1px}
+.lbbar-w{width:100%;height:4px;background:#1a0e05;border-radius:2px;margin-top:4px}
+.lbbar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--y),var(--or));transition:width .5s}
+.lbtime{font-size:.95rem;color:var(--gn);font-family:'Share Tech Mono';text-align:right}
+.lbsess{font-size:.58rem;color:#8a6a4a;text-align:right}
+.loglist{display:flex;flex-direction:column;gap:6px;max-height:500px;overflow-y:auto}
+.loglist::-webkit-scrollbar{width:5px}
+.loglist::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+.lentry{background:#0d0700;border:1px solid var(--bd);border-radius:3px;padding:9px 11px;display:flex;align-items:flex-start;gap:9px;font-size:.76rem;animation:sli .25s ease}
+@keyframes sli{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.licon{font-size:1.25rem;flex-shrink:0}
+.lbody{flex:1;min-width:0}
+.lname{color:var(--y);font-family:'Black Ops One',cursive;font-size:.78rem}
+.lts{color:#6a4a2a;font-size:.6rem}
+.ldet{color:var(--tn);margin-top:1px;word-break:break-word}
+.ldur{color:var(--or);font-size:.68rem;margin-top:2px}
+.lthumb{width:54px;height:54px;object-fit:cover;border:2px solid var(--bd);border-radius:3px;flex-shrink:0;cursor:pointer;transition:transform .15s}
+.lthumb:hover{transform:scale(1.08);border-color:var(--y)}
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}
+.gitem{background:#0d0700;border:2px solid var(--bd);border-radius:4px;overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}
+.gitem:hover{border-color:var(--y);transform:scale(1.02)}
+.gimg{width:100%;height:115px;object-fit:cover;display:block}
+.gcap{padding:5px 7px;font-size:.66rem;color:var(--tn);border-top:1px solid var(--bd)}
+.gmeta{font-size:.58rem;color:#6a4a2a;margin-top:2px}
+.empty{text-align:center;padding:36px;color:#5a4a3a;font-size:.78rem}
+.empty .big{font-size:2.6rem;margin-bottom:8px}
+.moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:500;align-items:center;justify-content:center}
+.moverlay.on{display:flex}
+.modal{background:var(--cb);border:3px solid var(--y);border-radius:6px;padding:20px;max-width:460px;width:92%;position:relative;box-shadow:0 0 40px rgba(255,214,0,.22)}
+.modal h2{font-family:'Black Ops One',cursive;color:var(--y);font-size:1.15rem;margin-bottom:12px;text-align:center;letter-spacing:2px}
+.mclose{position:absolute;top:10px;right:13px;background:none;border:none;color:var(--rd);font-size:1.3rem;cursor:pointer;font-family:'Black Ops One',cursive;line-height:1}
+.uzone{border:3px dashed var(--bd);border-radius:4px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:11px}
+.uzone:hover,.uzone.drag{border-color:var(--y);background:rgba(255,214,0,.04)}
+.uzone input{display:none}
+.uzone .zi{font-size:2rem;margin-bottom:5px}
+.uzone p{font-size:.72rem;color:#8a6a4a}
+.previmg{width:100%;max-height:190px;object-fit:cover;border:2px solid var(--bd);border-radius:4px;display:none;margin-bottom:9px}
+.cinput{width:100%;background:#0a0600;border:2px solid var(--bd);color:var(--tn);font-family:'Share Tech Mono',monospace;font-size:.8rem;padding:8px 11px;border-radius:3px;margin-bottom:9px;outline:none}
+.cinput:focus{border-color:var(--y)}
+.cinput::placeholder{color:#5a3a1a}
+.lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:600;align-items:center;justify-content:center;flex-direction:column}
+.lb.on{display:flex}
+.lb img{max-width:90vw;max-height:72vh;object-fit:contain;border:3px solid var(--y);border-radius:4px}
+.lb-cap{margin-top:11px;color:var(--tn);font-size:.82rem;text-align:center;max-width:80vw}
+.lb-x{position:absolute;top:16px;right:20px;font-size:1.7rem;color:var(--rd);cursor:pointer;background:none;border:none;font-family:'Black Ops One',cursive}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--gn);color:#000;font-family:'Black Ops One',cursive;font-size:.78rem;letter-spacing:1px;padding:10px 16px;border-radius:4px;box-shadow:0 4px 18px rgba(57,255,20,.3);z-index:999;transform:translateX(200%);transition:transform .3s}
+.toast.on{transform:translateX(0)}
+.toast.err{background:var(--rd);color:#fff;box-shadow:0 4px 18px rgba(255,49,49,.3)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💩 SITE SHIT TRACKER 3000 💩</h1>
+  <div class="tag">OFFICIAL PORTA-POTTY TIME MANAGEMENT SYSTEM™ &nbsp;·&nbsp; EST. 2025</div>
+  <div class="sync-status load" id="sync-status">⏳ CONNECTING TO DATABASE...</div>
+</header>
+
+<div class="ticker-wrap"><div class="ticker-track" id="ticker">🚽 CLOCKING IN FOR COMPANY TIME &nbsp;•&nbsp; 💩 IF YOU AIN'T SQUATTING YOU AIN'T WORKING &nbsp;•&nbsp; ⚠️ MANAGEMENT IS WATCHING &nbsp;•&nbsp; 🧻 WIPE SMART NOT HARD &nbsp;•&nbsp; 🏆 ALL RECORDS ARE PERMANENT &nbsp;•&nbsp; 💩 NUMBER TWO IS NUMBER ONE PRIORITY &nbsp;•&nbsp;</div></div>
+
+<div class="container">
+  <div class="tally" id="tally"></div>
+
+  <div class="shame" id="shame">
+    <div class="shame-icon">🏆</div>
+    <div>
+      <div class="shame-title">⚠️ REIGNING THRONE CHAMPION ⚠️</div>
+      <div class="shame-name" id="shame-name"></div>
+      <div class="shame-sub" id="shame-sub"></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tbtn on" id="t-workers" onclick="switchTab('workers')">🔧 Workers</button>
+    <button class="tbtn" id="t-leaderboard" onclick="switchTab('leaderboard')">🏆 Leaderboard</button>
+    <button class="tbtn" id="t-log" onclick="switchTab('log')">📋 Log</button>
+    <button class="tbtn" id="t-gallery" onclick="switchTab('gallery')">📸 Gallery</button>
+  </div>
+
+  <div class="panel on" id="panel-workers"><div class="wgrid" id="wgrid"></div></div>
+  <div class="panel" id="panel-leaderboard"><div class="card"><div class="ctitle">🏆 LIFETIME THRONE TIME RANKINGS</div><div class="lboard" id="lboard"></div></div></div>
+  <div class="panel" id="panel-log"><div class="card"><div class="ctitle">📋 REAL-TIME MISSION LOG</div><div class="loglist" id="loglist"><div class="empty"><div class="big">📋</div>No missions logged yet.</div></div></div></div>
+  <div class="panel" id="panel-gallery"><div class="card"><div class="ctitle">📸 HALL OF DOCUMENTATION</div><div class="ggrid" id="ggrid"><div class="empty" style="grid-column:1/-1"><div class="big">📸</div>No evidence uploaded yet.</div></div></div></div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="moverlay" id="modal">
+  <div class="modal">
+    <button class="mclose" id="modal-close">✕</button>
+    <h2>📸 UPLOAD EVIDENCE</h2>
+    <p style="text-align:center;font-size:.7rem;color:#8a6a4a;margin-bottom:11px">Worker: <strong id="modal-worker" style="color:var(--y)"></strong></p>
+    <div class="uzone" id="uzone">
+      <div class="zi">🚽</div>
+      <p>Tap or drag photo here</p>
+      <input type="file" id="file-input" accept="image/*">
+    </div>
+    <img id="prev-img" class="previmg" alt="preview">
+    <input type="text" class="cinput" id="cap-input" placeholder="Caption... (e.g. 'took his sweet time')">
+    <button class="btn bpic" style="width:100%;font-size:.82rem;padding:10px" id="submit-btn">💾 SUBMIT EVIDENCE</button>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lb">
+  <button class="lb-x" id="lb-close">✕</button>
+  <img id="lb-img" src="" alt="">
+  <div class="lb-cap" id="lb-cap"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, push, onValue, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// ============================================================
+// 🔥 FIREBASE CONFIG — your database is already wired in!
+// ============================================================
+const firebaseConfig = {
+  databaseURL: "https://shittracker-app-default-rtdb.firebaseio.com"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ============================================================
+const TITLES=['The Apprentice','Junior Squatter','Mid-Level Sitter','Senior Stinker','Lead Dumper','Principal Pooper','Staff Depositor','Distinguished Flusher','VP of #2','Grand Throne Master'];
+const IN_M=['answered the call of nature','clocked in for quality time','is on a mission','entered the chamber','is handling business','reported to duty','entered the danger zone','is in the hot seat'];
+const OUT_M=['emerged victorious','mission complete','back to pretending to work','returned to the job site','exited with dignity (allegedly)','completed the assignment','clocked out of the throne room','survived another session'];
+const CREW=[['#1','Big Mike'],['#2','Sweaty Steve'],['#3','Lefty'],['#4','Two-Flush Tony'],['#5','Diesel'],['#6','The Quiet One'],['#7','Hammer Hands'],['#8','Foreman Fred'],['#9','New Guy'],['#10','Old Timer']];
+
+let workers = [];
+let log = [];
+let gallery = [];
+let uploadId = null;
+let timers = {};
+let initialized = false;
+
+// UTILS
+function fmtMs(ms){
+  if(!ms||ms<0)return'0s';
+  const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60);
+  if(h>0)return h+'h '+(m%60)+'m';
+  if(m>0)return m+'m '+(s%60)+'s';
+  return s+'s';
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'Share Tech Mono', monospace;
-  background: var(--bg);
-  background-image: repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(255,214,0,0.025) 49px, rgba(255,214,0,0.025) 50px), repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(255,214,0,0.025) 49px, rgba(255,214,0,0.025) 50px);
-  color: var(--tan);
-  min-height: 100vh;
-  padding-bottom: 60px;
+function fmtDate(d){
+  const dt=new Date(d);
+  return dt.toLocaleDateString([],{month:'short',day:'numeric'})+' '+dt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
-header {
-  background: linear-gradient(180deg, #2a1500 0%, #0d0600 100%);
-  border-bottom: 4px solid var(--yellow);
-  padding: 18px 20px 14px;
-  text-align: center;
-  position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 4px 30px rgba(255,107,0,0.25);
+function pick(arr,seed){
+  const num = typeof seed === 'string' ? seed.split('').reduce((a,c)=>a+c.charCodeAt(0),0) : seed;
+  return arr[Math.abs(num)%arr.length];
 }
-h1 {
-  font-family: 'Black Ops One', cursive;
-  font-size: clamp(1.5rem, 4vw, 2.8rem);
-  color: var(--yellow);
-  text-shadow: 3px 3px 0 #5C3A1E, 0 0 30px rgba(255,214,0,0.35);
-  letter-spacing: 2px;
+function title(w){
+  const m=Math.floor((w.ms||0)/60000);
+  return TITLES[m<5?0:m<15?1:m<30?2:m<60?3:m<120?4:m<240?5:m<480?6:m<720?7:m<1440?8:9];
 }
-.tagline { font-size: 0.68rem; color: var(--orange); letter-spacing: 4px; margin-top: 4px; }
-.ticker-wrap { background: var(--yellow); overflow: hidden; padding: 5px 0; border-bottom: 3px solid var(--brown); }
-.ticker-track {
-  display: inline-block; white-space: nowrap;
-  animation: ticker 30s linear infinite;
-  font-family: 'Black Ops One', cursive; font-size: 0.8rem; color: #1a0e05;
+function toast(msg,err){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className='toast on'+(err?' err':'');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.className='toast',2800);
 }
-@keyframes ticker { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
-.container { max-width: 980px; margin: 0 auto; padding: 18px 14px; }
-.tally-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px; margin-bottom: 16px;
+function setSyncStatus(state, msg){
+  const el = document.getElementById('sync-status');
+  el.className = 'sync-status ' + state;
+  el.textContent = msg;
 }
-@media(max-width:500px){ .tally-grid { grid-template-columns: repeat(2,1fr); } }
-.tally-box {
-  background: #0d0700; border: 2px solid var(--border); border-radius: 4px;
-  padding: 12px; text-align: center;
+
+// INIT — listen to Firebase in real time
+function init(){
+  // Listen to workers
+  onValue(ref(db, 'workers'), (snap) => {
+    const data = snap.val();
+    if(!data){
+      // First time — seed the database with crew
+      const initial = {};
+      CREW.forEach(([n,k],i) => {
+        initial[i] = {id:i, n, k, in:false, ss:null, ms:0, s:0, p:0};
+      });
+      set(ref(db, 'workers'), initial);
+      return;
+    }
+    workers = Object.values(data).sort((a,b)=>a.id-b.id);
+    if(!initialized){
+      initialized = true;
+      setSyncStatus('ok', '🟢 LIVE — ALL CREW SYNCED IN REAL TIME');
+    }
+    // restart timers for active sessions
+    workers.forEach(w => {
+      if(w.in && w.ss && !timers[w.id]) startTimer(w.id);
+      if(!w.in && timers[w.id]) stopTimer(w.id);
+    });
+    renderAll();
+  }, (err) => {
+    setSyncStatus('err', '🔴 DATABASE ERROR — CHECK CONNECTION');
+    console.error(err);
+  });
+
+  // Listen to log
+  onValue(ref(db, 'log'), (snap) => {
+    const data = snap.val();
+    log = data ? Object.values(data).sort((a,b) => new Date(b.t) - new Date(a.t)).slice(0,200) : [];
+    renderLog();
+  });
+
+  // Listen to gallery
+  onValue(ref(db, 'gallery'), (snap) => {
+    const data = snap.val();
+    gallery = data ? Object.values(data).sort((a,b) => new Date(b.t) - new Date(a.t)) : [];
+    renderGallery();
+  });
+
+  setInterval(tickerUpdate, 6000);
 }
-.tally-num { font-family: 'Black Ops One', cursive; font-size: 1.8rem; color: var(--yellow); line-height: 1; }
-.tally-lbl { font-size: 0.6rem; color: #8a6a4a; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
-.shame-banner {
-  background: linear-gradient(135deg, #300000, #1a0000);
-  border: 3px solid var(--red); border-radius: 4px;
-  padding: 16px; margin-bottom: 20px; text-align: center;
+
+// ACTIONS
+window.clockIn = function(id){
+  const w = workers[id];
+  if(!w || w.in) return;
+  const now = new Date().toISOString();
+  update(ref(db, 'workers/'+id), {
+    in: true,
+    ss: now,
+    s: (w.s||0) + 1
+  });
+  // Add log entry
+  push(ref(db, 'log'), {
+    wid: id,
+    k: w.k,
+    type: 'in',
+    t: now,
+    dur: null,
+    cap: null
+  });
+  toast('🚽 '+w.k+' is ON THE CLOCK!');
+};
+
+window.clockOut = function(id){
+  const w = workers[id];
+  if(!w || !w.in) return;
+  const dur = Date.now() - new Date(w.ss).getTime();
+  const now = new Date().toISOString();
+  update(ref(db, 'workers/'+id), {
+    in: false,
+    ss: null,
+    ms: (w.ms||0) + dur
+  });
+  push(ref(db, 'log'), {
+    wid: id,
+    k: w.k,
+    type: 'out',
+    t: now,
+    dur: dur,
+    cap: null
+  });
+  toast('✅ '+w.k+' BACK ON SITE — '+fmtMs(dur));
+  stopTimer(id);
+};
+
+window.openUpload = function(id){
+  uploadId = id;
+  document.getElementById('modal-worker').textContent = workers[id].k;
+  document.getElementById('file-input').value = '';
+  document.getElementById('prev-img').style.display = 'none';
+  document.getElementById('cap-input').value = '';
+  document.getElementById('modal').classList.add('on');
+};
+
+// TIMERS
+function startTimer(id){
+  stopTimer(id);
+  timers[id] = setInterval(()=>{
+    const el = document.getElementById('lt-'+id);
+    const w = workers.find(x=>x.id===id);
+    if(el && w && w.in && w.ss){
+      el.textContent = '⏱ LIVE: '+fmtMs(Date.now()-new Date(w.ss).getTime());
+    }
+  },1000);
 }
-.shame-title { font-family: 'Black Ops One', cursive; color: var(--red); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; }
-.shame-name { font-family: 'Black Ops One', cursive; color: var(--yellow); font-size: 1.6rem; margin: 8px 0; }
-.shame-sub { font-size: 0.75rem; color: var(--tan); }
-.tabs {
-  display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 2px solid var(--border); overflow-x: auto;
+function stopTimer(id){
+  if(timers[id]){clearInterval(timers[id]);delete timers[id];}
 }
-.tab-btn {
-  padding: 10px 16px; background: transparent; border: none; color: var(--tan); cursor: pointer;
-  font-family: 'Black Ops One', cursive; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;
-  border-bottom: 3px solid transparent; transition: all 0.2s;
+
+// UPLOAD
+function setupUpload(){
+  document.getElementById('modal-close').onclick=()=>{document.getElementById('modal').classList.remove('on');uploadId=null;};
+  document.getElementById('modal').onclick=function(e){if(e.target===this){this.classList.remove('on');uploadId=null;}};
+  document.getElementById('uzone').onclick=()=>document.getElementById('file-input').click();
+  document.getElementById('file-input').onchange=e=>{if(e.target.files[0])prevFile(e.target.files[0]);};
+  const uz=document.getElementById('uzone');
+  uz.ondragover=e=>{e.preventDefault();uz.classList.add('drag');};
+  uz.ondragleave=()=>uz.classList.remove('drag');
+  uz.ondrop=e=>{
+    e.preventDefault();uz.classList.remove('drag');
+    const f=e.dataTransfer.files[0];
+    if(f&&f.type.startsWith('image/')){
+      try{const dt=new DataTransfer();dt.items.add(f);document.getElementById('file-input').files=dt.files;}catch(err){}
+      prevFile(f);
+    }
+  };
+  document.getElementById('submit-btn').onclick=submitUpload;
 }
-.tab-btn.active { color: var(--yellow); border-bottom-color: var(--yellow); }
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
-.worker-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px;
+
+function prevFile(f){
+  const r=new FileReader();
+  r.onload=e=>{const img=document.getElementById('prev-img');img.src=e.target.result;img.style.display='block';};
+  r.readAsDataURL(f);
 }
-.worker-card {
-  background: var(--card-bg); border: 2px solid var(--border); border-radius: 6px; padding: 14px;
-  transition: all 0.3s;
+
+function submitUpload(){
+  const file=document.getElementById('file-input').files[0];
+  if(!file){toast('Pick a photo first!',true);return;}
+  const cap=document.getElementById('cap-input').value.trim()||'No caption';
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const w=workers[uploadId];
+    const ts=new Date().toISOString();
+    push(ref(db, 'gallery'), {
+      wid: uploadId,
+      k: w.k,
+      src: e.target.result,
+      cap,
+      t: ts
+    });
+    update(ref(db, 'workers/'+uploadId), { p: (w.p||0)+1 });
+    push(ref(db, 'log'), {
+      wid: uploadId,
+      k: w.k,
+      type: 'photo',
+      t: ts,
+      dur: null,
+      cap
+    });
+    document.getElementById('modal').classList.remove('on');
+    uploadId=null;
+    toast('📸 Evidence filed!');
+  };
+  reader.readAsDataURL(file);
 }
-.worker-card.active-session {
-  border-color: var(--green); box-shadow: 0 0 20px rgba(57,255,20,0.2);
+
+// LIGHTBOX
+function setupLightbox(){
+  document.getElementById('lb-close').onclick=()=>document.getElementById('lb').classList.remove('on');
+  document.getElementById('lb').onclick=function(e){if(e.target===this||e.target.id==='lb-img')this.classList.remove('on');};
 }
-.worker-header {
-  display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;
+
+window.openLB=function(idx){
+  const g=gallery[idx];
+  if(!g)return;
+  document.getElementById('lb-img').src=g.src;
+  document.getElementById('lb-cap').textContent=(g.k+' · '+fmtDate(g.t)+(g.cap&&g.cap!=='No caption'?' · "'+g.cap+'"':''));
+  document.getElementById('lb').classList.add('on');
+};
+
+// TABS
+window.switchTab=function(name){
+  ['workers','leaderboard','log','gallery'].forEach(n=>{
+    document.getElementById('t-'+n).className='tbtn'+(n===name?' on':'');
+    document.getElementById('panel-'+n).className='panel'+(n===name?' on':'');
+  });
+};
+
+// TICKER
+function tickerUpdate(){
+  const live=workers.filter(w=>w.in).map(w=>w.k);
+  const top=[...workers].sort((a,b)=>(b.s||0)-(a.s||0))[0];
+  let t='🚽 CLOCKING IN FOR COMPANY TIME \xa0•\xa0 💩 IF YOU AIN\'T SQUATTING YOU AIN\'T WORKING \xa0•\xa0 ⚠️ MANAGEMENT IS WATCHING \xa0•\xa0 🧻 WIPE SMART NOT HARD \xa0•\xa0 🏆 ALL RECORDS ARE PERMANENT \xa0•\xa0 ';
+  if(live.length)t+='🟢 IN SESSION: '+live.join(', ')+' \xa0•\xa0 ';
+  if(top&&top.s>0)t+='👑 SESSION KING: '+top.k+' ('+top.s+' missions) \xa0•\xa0 ';
+  document.getElementById('ticker').textContent=t;
 }
-.worker-name { font-family: 'Black Ops One', cursive; color: var(--yellow); font-size: 1.1rem; }
-.worker-nickname { color: var(--orange); }
-.worker-rank { font-size: 0.7rem; color: #8a6a4a; margin-top: 3px; text-transform: uppercase; letter-spacing: 1px; }
-.status-pill {
-  padding: 6px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase;
+
+// RENDER ALL
+function renderAll(){renderTally();renderWorkers();renderLeaderboard();renderShame();tickerUpdate();}
+
+function renderTally(){
+  const live=workers.filter(w=>w.in).length;
+  const ts=workers.reduce((a,w)=>a+(w.s||0),0);
+  const tms=workers.reduce((a,w)=>a+(w.ms||0),0);
+  document.getElementById('tally').innerHTML=
+    `<div class="tbox"><div class="tnum" style="color:var(--gn)">${live}</div><div class="tlbl">🟢 On Throne</div></div>`+
+    `<div class="tbox"><div class="tnum">${ts}</div><div class="tlbl">Sessions</div></div>`+
+    `<div class="tbox"><div class="tnum">${fmtMs(tms)}</div><div class="tlbl">Total Time</div></div>`+
+    `<div class="tbox"><div class="tnum">${gallery.length}</div><div class="tlbl">📸 Evidence</div></div>`;
 }
-.status-pill.on { background: rgba(57,255,20,0.2); color: var(--green); border: 1px solid var(--green); }
-.status-pill.off { background: rgba(212,170,125,0.1); color: var(--tan); border: 1px solid var(--tan); }
-.stats-row {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;
+
+function renderWorkers(){
+  document.getElementById('wgrid').innerHTML=workers.map(w=>{
+    const lms=w.in&&w.ss?Date.now()-new Date(w.ss).getTime():0;
+    const last=log.find(l=>l.wid===w.id);
+    const lastStr=last?'Last: '+fmtDate(last.t):'No activity yet';
+    return `<div class="wcard ${w.in?'live':''}">
+      <div class="whead">
+        <div>
+          <div class="wname">${w.n} · <span class="wnick">${w.k}</span></div>
+          <div class="wrank">${title(w)}</div>
+        </div>
+        <div class="wpill ${w.in?'on':'off'}">${w.in?'🚽 IN SESSION':'🔧 ON SITE'}</div>
+      </div>
+      <div class="srow">
+        <div class="sbox"><div class="slbl">Sessions</div><div class="sval hi">${w.s||0}</div></div>
+        <div class="sbox"><div class="slbl">Total Time</div><div class="sval">${fmtMs(w.ms||0)}</div></div>
+        <div class="sbox"><div class="slbl">📸 Pics</div><div class="sval">${w.p||0}</div></div>
+      </div>
+      <div class="ltimer ${w.in?'on':''}" id="lt-${w.id}">⏱ LIVE: ${fmtMs(lms)}</div>
+      <div class="brow">
+        <button class="btn bin" onclick="clockIn(${w.id})" ${w.in?'disabled':''}>🚽 CLOCK IN</button>
+        <button class="btn bout" onclick="clockOut(${w.id})" ${!w.in?'disabled':''}>✅ CLOCK OUT</button>
+        <button class="btn bpic" onclick="openUpload(${w.id})">📸 UPLOAD</button>
+      </div>
+      <div class="wlast">${lastStr}</div>
+    </div>`;
+  }).join('');
+  workers.forEach(w=>{if(w.in&&!timers[w.id])startTimer(w.id);});
 }
-.stat-box { background: #0d0700; padding: 8px; border-radius: 4px; text-align: center; }
-.stat-label { font-size: 0.65rem; color: #8a6a4a; text-transform: uppercase; }
-.stat-val { font-family: 'Black Ops One', cursive; font-size: 1.2rem; color: var(--tan); margin-top: 2px; }
-.stat-val.hi { color: var(--yellow); }
-.live-timer {
-  padding: 8px; background: rgba(57,255,20,0.1); border: 1px solid var(--green); border-radius: 4px;
-  text-align: center; color: var(--green); font-size: 0.85rem; margin-bottom: 10px; display: none;
+
+function renderLeaderboard(){
+  const sorted=[...workers].sort((a,b)=>(b.ms||0)-(a.ms||0));
+  const maxMs=sorted[0]?.ms||1;
+  const syms=['🥇','🥈','🥉'];
+  document.getElementById('lboard').innerHTML=sorted.map((w,i)=>{
+    const cls=i===0?'g':i===1?'s':i===2?'b':'o';
+    const bar=Math.max(4,Math.round((w.ms||0)/maxMs*100));
+    return `<div class="lbrow">
+      <div class="lbrank ${cls}">${syms[i]||i+1}</div>
+      <div style="flex:1">
+        <div class="lbname">${w.n} · ${w.k}</div>
+        <div class="lbtitle">${title(w)}</div>
+        <div class="lbbar-w"><div class="lbbar" style="width:${bar}%"></div></div>
+      </div>
+      <div>
+        <div class="lbtime">${fmtMs(w.ms||0)}</div>
+        <div class="lbsess">${w.s||0} sessions · ${w.p||0} 📸</div>
+      </div>
+    </div>`;
+  }).join('');
 }
-.live-timer.show { display: block; animation: pulse 1s infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
-.btn-row { display: flex; gap: 8px; margin-bottom: 10px; }
-.btn {
-  flex: 1; padding: 10px; border: none; border-radius: 4px; cursor: pointer;
-  font-family: 'Black Ops One', cursive; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
-  transition: all 0.2s;
+
+function renderLog(){
+  const el=document.getElementById('loglist');
+  if(!log.length){el.innerHTML='<div class="empty"><div class="big">📋</div>No missions logged yet.</div>';return;}
+  el.innerHTML=log.map((e,i)=>{
+    let icon,det,dur='',thumb='';
+    if(e.type==='in'){icon='🚽';det=`<span style="color:var(--gn)">${pick(IN_M,e.t||i)}</span>`;}
+    else if(e.type==='out'){
+      icon='✅';det=`<span style="color:var(--tn)">${pick(OUT_M,e.t||i)}</span>`;
+      if(e.dur)dur=`<div class="ldur">Session: ${fmtMs(e.dur)}</div>`;
+    } else {
+      icon='📸';det=`<span style="color:var(--or)">uploaded evidence</span>`;
+      const g=gallery.find(g=>g.wid===e.wid&&g.t===e.t);
+      if(g){const gi=gallery.indexOf(g);thumb=`<img class="lthumb" src="${g.src}" alt="" onclick="openLB(${gi})">`;}
+    }
+    return `<div class="lentry">
+      <div class="licon">${icon}</div>
+      <div class="lbody">
+        <div class="lname">${e.k}</div>
+        <div class="lts">${fmtDate(e.t)}</div>
+        <div class="ldet">${det}${e.cap&&e.cap!=='No caption'?' · "'+e.cap+'"':''}</div>
+        ${dur}
+      </div>
+      ${thumb}
+    </div>`;
+  }).join('');
 }
-.btn-in { background: var(--green); color: #1a0e05; }
-.btn-in:hover:not(:disabled) { background: #2ce600; transform: scale(1.05); }
-.btn-in:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-out { background: var(--yellow); color: #1a0e05; }
-.btn-out:hover:not(:disabled) { background: #ffd000; transform: scale(1.05); }
-.btn-out:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-photo { background: var(--orange); color: #1a0e05; }
-.btn-photo:hover { background: #ff7a1a; transform: scale(1.05); }
-.last-seen { font-size: 0.7rem; color: #8a6a4a; }
-.lb-row {
-  display: flex; gap: 12px; padding: 12px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 4px;
-  align-items: center; margin-bottom: 8px;
+
+function renderGallery(){
+  const el=document.getElementById('ggrid');
+  if(!gallery.length){el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="big">📸</div>No evidence uploaded yet.</div>';return;}
+  el.innerHTML=gallery.map((g,i)=>`
+    <div class="gitem" onclick="openLB(${i})">
+      <img class="gimg" src="${g.src}" alt="" loading="lazy">
+      <div class="gcap">${g.cap||'No caption'}<div class="gmeta">${g.k} · ${fmtDate(g.t)}</div></div>
+    </div>`).join('');
 }
-.lb-rank { font-family: 'Black Ops One', cursive; font-size: 1.4rem; min-width: 30px; text-align: center; }
-.lb-rank.gold { color: #FFD600; }
-.lb-rank.silver { color: #C0C0C0; }
-.lb-rank.bronze { color: #CD7F32; }
-.lb-name { font-family: 'Black Ops One', cursive; color: var(--yellow); font-size: 0.95rem; }
-.lb-title { font-size: 0.7rem; color: #8a6a4a; }
-.lb-bar-wrap { background: #0d0700; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 4px; }
-.lb-bar { background: linear-gradient(90deg, var(--orange), var(--yellow)); height: 100%; }
-.lb-time { font-family: 'Black Ops One', cursive; color: var(--yellow); font-size: 0.9rem; }
-.lb-sessions { font-size: 0.7rem; color: #8a6a4a; }
-.log-entry {
-  display: flex; gap: 12px; padding: 12px; background: var(--card-bg); border-left: 3px solid var(--border);
-  border-radius: 4px; margin-bottom: 8px; align-items: flex-start;
+
+function renderShame(){
+  const top=[...workers].sort((a,b)=>(b.ms||0)-(a.ms||0))[0];
+  const el=document.getElementById('shame');
+  if(!top||!top.ms){el.style.display='none';return;}
+  el.style.display='flex';
+  document.getElementById('shame-name').textContent=top.n+' · '+top.k;
+  document.getElementById('shame-sub').textContent=fmtMs(top.ms)+' total · '+(top.s||0)+' sessions · '+title(top);
 }
-.log-icon { font-size: 1.4rem; min-width: 30px; }
-.log-body { flex: 1; }
-.log-name { font-family: 'Black Ops One', cursive; color: var(--yellow); font-size: 0.9rem; }
-.log-ts { font-size: 0.7rem; color: #8a6a4a; }
-.log-detail { font-size: 0.8rem; color: var(--tan); margin-top: 2px; }
-.log-dur { font-size: 0.75rem; color: var(--orange); margin-top: 4px; }
-.log-thumb { width: 50px; height: 50px; border-radius: 4px; cursor: pointer; object-fit: cover; }
-.gallery-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;
-}
-.gallery-item {
-  position: relative; overflow: hidden; border-radius: 6px; cursor: pointer;
-  border: 2px solid var(--border); transition: all 0.3s;
-}
-.gallery-item:hover { border-color: var(--yellow); }
-.gallery-img { width: 100%; height: 200px; object-fit: cover; display: block; }
-.gallery-cap {
-  position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(180deg, transparent, #1a0e05);
-  padding: 12px 8px 8px; color: var(--tan); font-size: 0.75rem;
-}
-.gallery-meta { font-size: 0.65rem; color: #8a6a4a; margin-top: 3px; }
-.empty-state { text-align: center; padding: 40px 20px; color: #8a6a4a; }
-.empty-state .big { font-size: 3rem; margin-bottom: 10px; }
-.flash {
-  position: fixed; bottom: 20px; left: 20px; padding: 12px 16px; border-radius: 4px;
-  background: var(--green); color: #1a0e05; font-family: 'Black Ops One', cursive;
-  font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity 0.3s;
-  z-index: 1000;
-}
-.flash.show { opacity: 1; }
-.flash.err { background: var(--red); }
-.modal {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8);
-  display: none; align-items: center; justify-content: center; z-index: 2000;
-}
-.modal.show { display: flex; }
-.modal-content {
-  background: var(--card-bg); border: 2px solid var(--border); border-radius: 6px; padding: 20px;
-  max-width: 500px; width: 90%;
-}
-.modal-title { font-family: 'Black Ops One', cursive; color: var(--yellow); margin-bottom: 16px; }
-.form-group { margin-bottom: 12px; }
-.form-label { display: block; font-size: 0.8rem; color: var(--tan); margin-bottom: 4px; text-transform: uppercase; }
-input, textarea {
-  width: 100%; padding: 8px; background: #0d0700; border: 1px solid var(--border); color: var(--tan);
-  border-radius: 4px; font-family: 'Share Tech Mono', monospace;
-}
-.upload-zone {
-  border: 2px dashed var(--border); border-radius: 4px; padding: 20px; text-align: center;
-  cursor: pointer; transition: all
+
+setupUpload();
+setupLightbox();
+init();
+</script>
+</body>
+</html>
